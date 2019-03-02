@@ -29,6 +29,11 @@ export default new Vuex.Store({
             }
             return data
         },
+        async logout({ commit }, { username, password }) {
+            let user = { mail: username };
+            commit('SET_USER', user)
+            return user
+        },
 
     }
 })

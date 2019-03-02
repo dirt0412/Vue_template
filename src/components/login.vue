@@ -15,12 +15,6 @@
         </div>
       </form>
 
-
-    <!-- <div class="signup-link">
-      <span>Don't have an account? </span>
-      <router-link :to="{ name: 'register-id'}">Sign Up</router-link>
-    </div> -->
-
   </div>
 </template>
 
@@ -46,17 +40,20 @@ export default {
 
   methods: {
     async login() {
-      let data = await this.$store.dispatch("login", {
-        username: this.formUsername,
-        password: this.formPassword
-      });
-      if (data.status) {
-        this.formUsername = "";
-        this.formPassword = "";
-        this.$router.push("/list");
-      } else {
-        this.showNotification({ message: data.error });
-        this.formPassword = "";
+      if (this.formUsername.length > 2 && this.formPassword.length > 0) {
+        let data = await this.$store.dispatch("login", {
+          username: this.formUsername,
+          password: this.formPassword
+        });
+        if (data.status) {
+          this.formUsername = "";
+          this.formPassword = "";
+          this.$emit("authenticated", true);
+          this.$router.push("/list");
+        } else {
+          this.showNotification({ message: data.error });
+          this.formPassword = "";
+        }
       }
     }
   },
