@@ -23,14 +23,12 @@ export default new Vuex.Store({
     },
 
     actions: {
-
         async login({ commit }, { username, password }) {
-            const data = await this.$axios.$post('/login', { email: username, password: password })
-
+            // const data = await axios.get('http://localhost:3000/api/users/' + username) // { email: username, password: password }
+            const data = await axios.post('http://localhost:3000/api/login/', { mail: username, password: password })
             if (data.status) {
-                commit('SET_USER', data.userdata)
+                commit('SET_USER', data.user) // userdata
             }
-
             return data
         },
 

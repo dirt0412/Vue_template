@@ -50,11 +50,10 @@ export default {
         username: this.formUsername,
         password: this.formPassword
       });
-      console.log(data);
       if (data.status) {
         this.formUsername = "";
         this.formPassword = "";
-        this.$router.push("/contracts");
+        this.$router.push("/list");
       } else {
         this.showNotification({ message: data.error });
         this.formPassword = "";
@@ -79,7 +78,7 @@ export default {
 
   beforeCreate: function() {
     // if (!_.isNull(this.$store.state.user)) {
-    //   this.$router.push("/contracts");
+    //   this.$router.push("/list");
     // }
   }
 };
