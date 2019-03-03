@@ -6,13 +6,14 @@
             <!-- <button class="btn btn-info" style="margin-right:5px;float: right;" @click="showEditProductForm(selected)">
                 <font-awesome-icon :icon="['fas', 'edit']" />
               </button> -->
-               <b-button class="btn btn-info" style="margin-right:5px;float: right;" v-b-modal.modalToEditAddProduct>
+               <b-button class="btn btn-info" style="margin-right:5px;float: right;"
+               @click="showEditProductForm()" >
                   <font-awesome-icon :icon="['fas', 'edit']" />
                </b-button>
               <button class="btn btn-danger" style="float: right;" @click="removeProduct(selected)">
                  <font-awesome-icon :icon="['fas', 'minus-square']" />
               </button>
-               <span v-if="selected[0].id != -1">ID:{{selected[0].id}}</span>
+               <span v-if="selected[0] !== undefined && selected[0].id != -1">ID:{{selected[0].id}}</span>
         </div>
 
       <b-table
@@ -22,7 +23,8 @@
             selectedVariant="success"
             @row-selected="rowSelected" 
 
-            :items="products" >      
+            :items="products"
+            :fields="fields" >      
       </b-table>
        <div class="mt-3">
          <div class="d-block text-right">
@@ -36,15 +38,15 @@
 
   <b-modal id="modalToEditAddProduct"  ref="modalToEditAddProduct" hide-footer title="Product Add / Edit">
     <div class="d-block text-center">
-        <span v-if="selected[0].id != -1 ">Are you sure you want edit this product: <span style="font-weight: bold;">{{selected[0].name}}</span></span>
-        <span v-if="selected[0].id === -1">Are you sure you want add product</span>
+        <span v-if="selected[0] !== undefined && selected[0].id != -1 ">Are you sure you want edit this product: <span style="font-weight: bold;">{{selected[0].name}}</span></span>
+        <span v-if="selected[0] !== undefined && selected[0].id === -1">Are you sure you want add product</span>
     </div>
-    <div class="d-block text-left">
-        <span v-if="selected[0].id != -1">ID:{{selected[0].id}}</span> </br>
+    <div v-if="selected[0] !== undefined" class="d-block text-left">
+        <span v-if="selected[0] !== undefined && selected[0].id != -1">ID:{{selected[0].id}}</span> </br>
         <input style="margin-bottom:5px;" type="text" v-model="selected[0].name" placeholder="Name product"> </input> </br>
         <input style="margin-bottom:5px;" type="text" v-model="selected[0].description" placeholder="Description"> </input> </br>
         <!-- <input type="text" v-model="selected[0].price" placeholder="Price"> </input> -->
-         <money v-model="selected[0].price"></money> 
+         <money v-if="selected[0] !== undefined" v-model="selected[0].price"></money> 
     </div>
     <div class="d-block text-right">
         <b-button style="margin-right:5px;" class="btn btn-danger"  @click="addEditProduct(selected)">OK</b-button>
@@ -123,7 +125,34 @@ export default {
       },
       currentPage: 1,
       perPage: 5,
-      totalProducts: 0
+      totalProducts: 0,
+      fields: [
+        {
+          key: "id",
+          label: "Id",
+          type: "percentage 8%",
+          width: "8%",
+          thClass: "my-width10"
+        },
+        {
+          key: "name",
+          label: "Name",
+          type: "String",
+          class: "text-left"
+        },
+        {
+          key: "description",
+          label: "Description",
+          type: "String",
+          class: "text-left"
+        },
+        {
+          key: "price",
+          label: "Price",
+          type: "decimal",
+          class: "text-right"
+        }
+      ]
     };
   },
 
@@ -151,34 +180,30 @@ export default {
       this.selected = item;
     },
 
-    async showEditProductForm(selected) {
-      this.showModal = true;
-    },
-
     async addEditProduct(selected) {
-      let result = confirm("Want to add / edit product?");
-      if (result) {
-        if (selected[0].id !== -1) {
-          //edit product
-          const data = await axios.put(
-            "http://localhost:3000/api/product/" + selected[0].id,
-            { product: selected[0] }
-          );
+      //let result = confirm("Want to add / edit product?");
+      //if (result) {
+      if (selected[0].id !== -1) {
+        //edit product
+        const data = await axios.put(
+          "http://localhost:3000/api/product/" + selected[0].id,
+          { product: selected[0] }
+        );
+        this.getProductsPagination();
+        this.resetSelectedProduct();
+        this.hideModal();
+      } else {
+        //add product
+        if (selected[0].name.length > 0) {
+          const data = await axios.post("http://localhost:3000/api/product", {
+            product: selected[0]
+          });
           this.getProductsPagination();
           this.resetSelectedProduct();
           this.hideModal();
-        } else {
-          //add product
-          if (selected[0].name.length > 0) {
-            const data = await axios.post("http://localhost:3000/api/product", {
-              product: selected[0]
-            });
-            this.getProductsPagination();
-            this.resetSelectedProduct();
-            this.hideModal();
-          } else alert("Give the name of the product.");
-        }
+        } else alert("Give the name of the product.");
       }
+      //}
     },
 
     async removeProduct(selected) {
@@ -198,11 +223,16 @@ export default {
       this.resetSelectedProduct();
       this.$refs.modalToEditAddProduct.hide();
     },
+    showEditProductForm(selected) {
+      this.$refs.modalToEditAddProduct.show();
+      //this.showModal = true;
+    },
 
     resetSelectedProduct() {
       this.selected = [{ id: -1, name: "", description: "", price: "" }];
     },
     changePage() {
+      this.resetSelectedProduct();
       this.getProductsPagination();
     }
   }
@@ -223,5 +253,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.my-width10 {
+  width: 8% !important;
 }
 </style>
