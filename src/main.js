@@ -27,10 +27,9 @@ const router = new VueRouter({
 Vue.use(BootstrapVue);
 Vue.use(money, { precision: 2 })
 
-Vue.prototype.$axios =
-  new Vue({
-    render: h => h(App),
-    Vuex,
-    store,
-    router
-  }).$mount('#app')
+new Vue({
+  render: h => h(App),
+  Vuex,
+  store,
+  router
+}).$mount('#app')
